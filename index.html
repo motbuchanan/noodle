@@ -152,6 +152,14 @@
   .modebar{display:flex;gap:8px;padding:6px 14px 0;max-width:600px;margin:0 auto;}
   .modebtn{flex:1;height:38px;border-radius:11px;border:1px solid var(--line);background:#00000028;color:var(--muted);font-family:var(--ui);font-size:13.5px;font-weight:600;cursor:pointer;transition:color .12s,background .12s,border-color .12s;}
   .modebtn.on{color:var(--amber);border-color:#f2a64a66;background:#f2a64a16;}
+  .layertoggle{display:flex;align-items:center;gap:12px;padding:9px 16px 2px;max-width:600px;margin:0 auto;}
+  .lt-txt{flex:1;min-width:0;}
+  .lt-title{font-family:var(--ui);font-weight:600;font-size:14px;color:var(--text);}
+  .lt-sub{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.3px;color:var(--muted);margin-top:2px;}
+  .lt-switch{flex:0 0 auto;width:52px;height:30px;border-radius:16px;border:1px solid var(--line);background:#00000035;position:relative;cursor:pointer;transition:background .15s,border-color .15s;}
+  .lt-switch .lt-knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:left .16s,background .16s;}
+  .lt-switch.on{background:#f2a64a22;border-color:#f2a64a66;}
+  .lt-switch.on .lt-knob{left:27px;background:var(--amber);}
   .layerctl{display:flex;align-items:center;gap:9px;padding-top:3px;}
   .lclab{font-family:var(--mono);font-size:8.5px;letter-spacing:1px;color:var(--muted);}
   .vol{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:3px;background:var(--line);outline:none;}
@@ -207,9 +215,9 @@
   </div>
 </div>
 
-<div class="modebar">
-  <button class="modebtn on" id="mSeq">Sequence</button>
-  <button class="modebtn" id="mLay">Layers</button>
+<div class="layertoggle">
+  <div class="lt-txt"><span class="lt-title">Layers</span><span class="lt-sub" id="ltSub">off — takes play one after another</span></div>
+  <button class="lt-switch" id="layerToggle" role="switch" aria-checked="false"><span class="lt-knob"></span></button>
 </div>
 
 <div class="clips" id="clips"></div>
@@ -734,15 +742,15 @@ async function beginOverdub(){
 // ---------- mode + help wiring ----------
 function applyModeUI(){
   const lay=settings.mode==="layers";
-  document.getElementById("mSeq").classList.toggle("on",!lay);
-  document.getElementById("mLay").classList.toggle("on",lay);
+  const sw=document.getElementById("layerToggle");
+  sw.classList.toggle("on",lay);sw.setAttribute("aria-checked",lay?"true":"false");
+  document.getElementById("ltSub").textContent=lay?"on — takes stack and play together":"off — takes play one after another";
   document.getElementById("faderRow").style.display=lay?"none":"";
   document.getElementById("breatheVal").style.display=lay?"none":"";
   document.getElementById("layerHint").hidden=!lay;
 }
 function setMode(m){settings.mode=m;saveMeta();stopPlayback();applyModeUI();render();}
-document.getElementById("mSeq").addEventListener("click",()=>setMode("sequence"));
-document.getElementById("mLay").addEventListener("click",()=>setMode("layers"));
+document.getElementById("layerToggle").addEventListener("click",()=>setMode(settings.mode==="layers"?"sequence":"layers"));
 document.getElementById("helpBtn").addEventListener("click",()=>document.getElementById("helpOverlay").classList.add("show"));
 document.getElementById("helpClose").addEventListener("click",()=>document.getElementById("helpOverlay").classList.remove("show"));
 document.getElementById("hpCancel").addEventListener("click",()=>document.getElementById("hpModal").classList.remove("show"));
